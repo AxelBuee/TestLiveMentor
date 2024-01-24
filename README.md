@@ -10,6 +10,8 @@ To use User Converter in your Ruby project, add the following line to your Gemfi
 gem 'user_converter', '~> 0.1.0'
 ```
 
+**Be sure to be located inside the `UserConverter` directory.** 
+
 Then run:
 ```bash
 bundle install
