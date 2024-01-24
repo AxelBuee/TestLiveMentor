@@ -21,6 +21,8 @@ Alternatively, you can install the gem manually:
 gem install user_converter -v 0.1.0
 ```
 
+You may need to use `--user-install` at the end of the command if you don't have write permissions in the global gem installation directory.
+
 ## Usage
 User Converter provides a simple interface to convert user data from a JSON file to a CSV file.
 
