@@ -10,11 +10,14 @@ json_data = JSON.parse(File.read(json_file_path))
 def flatten_keys(hash, prefix = nil)
     hash.flat_map do |k, v|
         new_key = prefix ? "#{prefix}.#{k}" : k.to_s
-        v.is_a?(Hash) ? flatten_keys(v, new_key) : new_key
+        if v.is_a?(Hash)
+            flatten_keys(v, new_key)
+        else
+            new_key
+        end
     end
 end
   
-# Extract unique flattened keys from the JSON data
 flattened_keys = json_data.flat_map { |user| flatten_keys(user) }.uniq
 
 # Create the header string
@@ -31,8 +34,10 @@ File.open(csv_file_path, 'w') do |file|
         value = user.dig(*key.split('.'))
         if key == 'tags' && value.is_a?(Array)
             "\"#{value.join(',')}\""
+        elsif value.nil?
+            ''
         else
-            value
+            value.is_a?(String) ? value : JSON.generate(value)
         end
         end.join(',')
         file.puts csv_line
