@@ -1,31 +1,38 @@
 require 'json'
 require 'csv'
 
-def json_to_csv(json_file, csv_file)
-    # Parse the JSON file
-    data = JSON.parse(File.read(json_file))
-  
-    # Extract headers
-    headers = data.first.keys
-  
-    # Open the CSV file for writing
-    CSV.open(csv_file, 'w') do |csv|
-      # Write headers
-      csv << headers
-  
-      # Write data
-      data.each do |hash|
-        csv << hash.map do |key, value|
-          # Convert arrays and hashes to strings without extra quotes or brackets
-          case value
-          when Array then value.join(',')
-          when Hash then value.map { |k, v| "#{k}:#{v}" }.join(',')
-          else value
-          end
-        end
-      end
+# Load JSON data from the file
+json_file_path = 'users.json'
+csv_file_path = 'users.csv'
+
+json_data = JSON.parse(File.read(json_file_path))
+
+# Define a method to recursively flatten the keys of nested hashes
+def flatten_keys(hash, prefix = nil)
+    hash.flat_map do |k, v|
+      new_key = prefix ? "#{prefix}.#{k}" : k.to_s
+      v.is_a?(Hash) ? flatten_keys(v, new_key) : new_key
     end
   end
   
-# Call the function
-json_to_csv('users.json', 'users.csv')
+  # Extract unique flattened keys from the JSON data
+  flattened_keys = json_data.flat_map { |user| flatten_keys(user) }.uniq
+  
+  # Create the header string
+  header = flattened_keys.join(',')
+  
+  # Specify the CSV file path
+  
+  # Open the file in write mode and write CSV lines
+  File.open(csv_file_path, 'w') do |file|
+    # Write CSV header
+    file.puts header
+  
+    # Write CSV lines
+    json_data.each do |user|
+      csv_line = flattened_keys.map { |key| user.dig(*key.split('.')) }.join(',')
+      file.puts csv_line
+    end
+  end
+  
+  puts "CSV file created at #{csv_file_path}"
